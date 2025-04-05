@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input id="title" placeholder="Enter title" />
+    <input id="author" placeholder="Enter author" />
+    <button id="post">Post</button>
+    <div id="container"></div>
+  
+    <script>
+      let Findfromeserver = [];
+  
+      let container = document.getElementById('container');
+  
+      async function getData() {
+        let res = await fetch('http://localhost:3000/data');
+        res = await res.json();
+        Findfromeserver = res;
+        console.log(res);
+        appendTheData(res);
+      }
+  
+      function appendTheData(res) {
+        container.innerHTML = "";
+  
+        res && res.forEach((elm) => {
+          let box = document.createElement('div');
+          box.style.border = "1px solid black";
+          box.style.padding = "10px";
+          box.style.margin = "10px";
+  
+          let p1 = document.createElement('p');
+          let p2 = document.createElement('p');
+          let p3 = document.createElement('p');
+          let del = document.createElement('button');
+  
+          del.classList.add("del");
+          del.innerHTML = "DELETE";
+  
+          del.addEventListener('click', () => {
+            deleteData(elm.id);
+          });
+  
+          p1.innerHTML = `ID: ${elm.id}`;
+          p2.innerHTML = `Title: ${elm.title}`;
+          p3.innerHTML = `Author: ${elm.author}`;
+  
+          box.append(p1, p2, p3, del);
+          container.append(box);
+        });
+      }
+  
+      function getDetails(id) {
+        return document.getElementById(id).value;
+      }
+  
+      document.getElementById('post').addEventListener('click', async () => {
+        let title = getDetails('title');
+        let author = getDetails('author');
+  
+        let newData = {
+          title: title,
+          author: author
+        };
+  
+        let res = await fetch(`http://localhost:3000/data`, {
+          method: "POST",
+          headers: {
+            'Content-type': "application/json"
+          },
+          body: JSON.stringify(newData)
+        });
+  
+        res = await res.json();
+        console.log(res, "this is res");
+  
+
+        getData();
+      });
+  
+      async function deleteData(id) {
+        try {
+          let res = await fetch(`http://localhost:3000/data/${id}`, {
+            method: "DELETE",
+            headers: {
+              'Content-Type': "application/json"
+            }
+          });
+  
+          res = await res.json();
+          console.log(res);
+  
+      
+          getData();
+  
+        } catch (error) {
+          console.log(error, "Error while deleting");
+        }
+      }
+      getData();
+    </script>
+  </body>
+</html>
+  
